@@ -16,7 +16,8 @@ tf.get_logger().setLevel('ERROR')
 # -------------------- IMPORTS --------------------
 from flask import Flask, render_template, request
 import numpy as np
-from keras.models import load_model
+import h5py
+from tensorflow.keras.models import load_model
 import joblib
 import requests
 from datetime import datetime, timedelta
