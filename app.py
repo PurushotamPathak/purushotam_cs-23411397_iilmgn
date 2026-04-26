@@ -9,15 +9,12 @@ warnings.filterwarnings("ignore")
 import logging
 logging.getLogger('absl').setLevel(logging.ERROR)
 
-import tensorflow as tf
-tf.get_logger().setLevel('ERROR')
 
 
 # -------------------- IMPORTS --------------------
 from flask import Flask, render_template, request
 import numpy as np
 import h5py
-from tensorflow.keras.models import load_model
 import joblib
 import requests
 from datetime import datetime, timedelta
@@ -25,9 +22,6 @@ from datetime import datetime, timedelta
 
 # -------------------- APP SETUP --------------------
 app = Flask(__name__)
-
-model = load_model('model/weather_lstm.h5', compile=False)
-scaler = joblib.load('model/scaler.save')
 
 OPENWEATHER_API_KEY = "375ffecb477f6563fb6ccc78021416e1"
 WEATHERAPI_KEY = "9a849ef7d2bb42a0b22202436262504"
@@ -101,22 +95,8 @@ def home():
             uv_label = "Extreme"
 
         # -------- MODEL PREDICTION --------
-        input_data = np.array(temps).reshape(-1, 1)
-        input_scaled = scaler.transform(input_data)
-
-        future_preds = []
-        current_seq = input_scaled.reshape(1, SEQ_LENGTH, 1)
-
-        for _ in range(3):
-            pred = model.predict(current_seq, verbose=0)
-            future_preds.append(pred[0][0])
-
-            new_seq = np.append(current_seq[0][1:], pred, axis=0)
-            current_seq = new_seq.reshape(1, SEQ_LENGTH, 1)
-
-        future_preds = scaler.inverse_transform(
-            np.array(future_preds).reshape(-1, 1)
-        )
+        # SIMPLE PREDICTION (no ML)
+        future_preds = [round(t + np.random.uniform(-1, 1), 2) for t in temps[:3]]
 
         future_dates = [
             (datetime.now() + timedelta(days=i)).strftime("%d %b")
